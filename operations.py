@@ -27,6 +27,9 @@ def menu():
 
 
 def mkdir(folder_name):
+    """
+    Creates a directory.
+    """
     try:
         os.mkdir(folder_name)
         print(f"Directory '{folder_name}' created successfully!")
@@ -36,17 +39,35 @@ def mkdir(folder_name):
         display_error(f"Error creating directory '{folder_name}': {e}")
 
 
-def cd(path):
+def cd(command):
+    """
+    Changes the current working directory.
+    """
     try:
-        os.chdir(path)
-        print(f"Current directory changed to '{path}'")
+        if len(command) < 2:
+            # If no path is provided, move to the user's home directory
+            os.chdir(os.path.expanduser("~"))
+            print(f"Changed to home directory: {os.getcwd()}")
+        else:
+            target_path = os.path.join(os.getcwd(), command[1])
+            print(f"Target path: {target_path}")  # Debugging line
+            if os.path.isdir(target_path):
+                os.chdir(target_path)
+                print(f"Changed to directory '{command[1]}': {os.getcwd()}")
+            else:
+                print(f"Error: Directory '{command[1]}' does not exist!")
     except FileNotFoundError:
-        display_error(f"Directory '{path}' does not exist!")
+        print(f"Error: Directory '{command[1]}' does not exist!")
     except PermissionError:
-        display_error(f"Permission denied to access '{path}'")
+        print(f"Error: Permission denied to access '{command[1]}'")
+    except Exception as e:
+        print(f"Error: {e}")
 
 
 def ls(path="."):
+    """
+    Lists the contents of the specified directory.
+    """
     try:
         contents = os.listdir(path)
         abs_path = os.path.abspath(path)
@@ -62,6 +83,9 @@ def ls(path="."):
 
 
 def touch(file_name):
+    """
+    Creates an empty file or updates its timestamp.
+    """
     try:
         open(file_name, "a").close()
         print(f"File '{file_name}' created successfully!")
@@ -70,6 +94,9 @@ def touch(file_name):
 
 
 def cat(command):
+    """
+    Displays the contents of a file.
+    """
     file_path = command[1] if len(command) > 1 else None
 
     while not file_path:
@@ -90,6 +117,9 @@ def cat(command):
 
 
 def echo(file_path, content):
+    """
+    Writes text to a file.
+    """
     try:
         with open(file_path, "w") as f:
             f.write(content)
@@ -99,6 +129,9 @@ def echo(file_path, content):
 
 
 def mv(source, destination):
+    """
+    Moves a file or directory.
+    """
     print(f"Moving '{source}' to '{destination}'")
     try:
         shutil.move(source, destination)
@@ -113,6 +146,9 @@ def mv(source, destination):
 
 
 def cp(source=None, destination=None):
+    """
+    Copies a file or directory.
+    """
     if not source:
         source = input("Enter the source path: ").strip()
     if not destination:
@@ -138,6 +174,9 @@ def cp(source=None, destination=None):
 
 
 def rm(path=None):
+    """
+    Removes a file or directory.
+    """
     while not path:
         path = input("Enter the path to remove: ").strip()
 
@@ -158,29 +197,42 @@ def rm(path=None):
         display_error(f"Error removing file/directory '{path}': {e}")
 
 
-def grep(pattern, path="."):
+def grep(command):
+    """
+    Searches for lines containing a pattern in a file.
+    """
     try:
-        with open(path, "r") as f:
+        if len(command) < 2:
+            print("Error: Please provide a search pattern and optionally a file path.")
+            return
+
+        pattern = command[1]
+        file_path = command[2] if len(command) > 2 else "."
+
+        if not os.path.isfile(file_path):
+            print(f"Error: File '{file_path}' does not exist!")
+            return
+
+        with open(file_path, "r") as f:
             lines_with_pattern = [
                 line for line in f if re.search(pattern, line)]
 
         if not lines_with_pattern:
             print(
-                f"No lines matching the pattern '{pattern}' found in '{path}'.")
+                f"No lines matching the pattern '{pattern}' found in '{file_path}'.")
         else:
-            print(f"Lines matching the pattern '{pattern}' in '{path}':")
+            print(f"Lines matching the pattern '{pattern}' in '{file_path}':")
             for line in lines_with_pattern:
                 print(line.strip())
 
-    except FileNotFoundError:
-        display_error(f"File '{path}' does not exist!")
-    except PermissionError:
-        display_error(f"Permission denied to access '{path}'")
-    except OSError as e:
-        display_error(f"Error searching file '{path}': {e}")
+    except Exception as e:
+        print(f"Error searching file: {e}")
 
 
 def save_state(file_path):
+    """
+    Saves the current working directory to a file.
+    """
     state = {"cwd": os.getcwd()}
     try:
         with open(file_path, "w") as f:
@@ -191,6 +243,9 @@ def save_state(file_path):
 
 
 def load_state(file_path):
+    """
+    Loads the current working directory from a file.
+    """
     try:
         with open(file_path, "r") as f:
             state = json.load(f)
@@ -233,7 +288,7 @@ def main():
         elif action == "mkdir":
             mkdir(command[1])
         elif action == "cd":
-            cd(command[1])
+            cd(command)
         elif action == "ls":
             ls(command[1] if len(command) > 1 else ".")
         elif action == "touch":
@@ -253,7 +308,7 @@ def main():
         elif action == "rm":
             rm(command[1] if len(command) > 1 else None)
         elif action == "grep":
-            grep(command[1], command[2] if len(command) > 2 else ".")
+            grep(command)
         elif action == "save_state":
             save_state(command[1])
         elif action == "load_state":
