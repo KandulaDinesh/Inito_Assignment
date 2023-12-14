@@ -9,7 +9,7 @@ This In-Memory File System is a Python program that simulates a basic file syste
 2. Clone the repository:
    ```bash
    git clone https://github.com/KandulaDinesh/Inito_Assignment.git
-   cd your-repository
+   cd Inito_Assignment
 3. Run the application in the terminal
    ```bash
      python main.py
