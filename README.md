@@ -1,4 +1,4 @@
-# In-Memory File System Documentation
+# In-Memory File System Manager Project
 
 ## Overview
 This In-Memory File System is a Python program that simulates a basic file system in memory. Users can interact with the file system using a command-line interface to perform operations such as creating directories, creating files, moving files, copying files, and more.
